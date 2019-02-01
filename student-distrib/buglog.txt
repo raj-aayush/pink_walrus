@@ -1,0 +1,68 @@
+Bug Log for pwOS (group 37):
+
+1)  Description: Invalid Magic number : 0x00000001
+    Type: Logical error
+    Explanation: When initializing the IDT, we had pushed and popped the registers in the wrong order so the multiboot magic number was wrong.
+
+2)  Description: Undefined reference to gdt_desc_ptr
+    Type: Syntax error
+    Explanation: The gdt_desc_ptr hadn't been declared as a global variable
+
+3)  Description: no reference to paging_initialize()
+    Type: Syntax error
+    Explanation: We forgot to add the #ifndef ASM before adding our code in paging.h
+ 
+ 4) Description: The rtc and keyboard simply wouldn't respond.
+    Type: Logical error
+    Explanation: We had setup the PIC driver correctly but we didn't take care of the reserved words in the IDT for interrupt handlers.
+ 
+ 5) Description: Derefencing memory addresses in video memory did not case page faults
+    Type: Logical error
+    Explanation: We hadn't taken care of the correct video memory bounds in paging
+    
+ 6) Description: Terminal read filled out a separate terminal buffer
+    Type: Design error
+    Explanation: We assumed there needed to be a separate terminal buffer array of characters for each instance of the terminal
+    
+ 7) Description: Screen scrolling didn't work as expected for single terminal
+    Type: Logical error
+    Explanation 1: One possible explanation is that we didn't take of all the edge cases for the scroll functionality.
+    Explanation 2: Another possible explanation is that we called the screen_scroll() function in keyboard handler instead of the putc()
+    
+ 8) Description: Some random keypressed get printed twice on the screen instead of just once
+    Type: Logical Error
+    Explanation: We had written a weird do-while loop in our keyboard handler. We changed this to a simpler while loop (thus eliminating the first extra run of the loop) and this fixed the issue of multiple keypresses.
+    
+9) Description: fish only printed the first frame in its loop and then froze screen
+    Type: Logical Error
+    Explanation: There was an issue with our RTC interrupt AND the vidmap function wasn't ready. We aren't entirely sure how this bug got fixed because there were a bunch of other bugs which we enountered with grep and cat during the same time and when we fixed some of those, fish started to work.
+    
+10) Description: File names with additional characters are also found in the directory.
+    Type: Logical error
+    Explanation: The string length of the fname and actual file needed to be compared along with the matching characters in read_dentry_by_name.
+    
+11) Description: Circular dependency in including hearder files
+    Type: Syntax error
+    Explanation: We had our struct definitions for pcb in systemcalls.h so, we wanted to include systemcalls.h in file_sys.h.
+                 However file_sys.h was already included in systemcalls.h, so we moved our pcb definitions to file_sys.h.
+                 
+12) Description: cat not working
+    Type: Logical error
+    Explanation: Our read_data function was not working correctly so, we had to change it.
+    
+13) Description: Unable to launch three independent shells simulteneously
+    Type: Design error
+    Explanation: When launching three shells from the pit handler, the shells got launched as child processes of the first root shell which isn't the expected functionality. To fix this issue, we had to remap the program image location and the vid mem location in the pit interrupt handler and flush the tlb after. This seems to make the new process think that it is a root process without any parent. This addition to the code helped up move forward with implementing the rest of MP 3.5
+    
+14) Description: screen scrolling doesn't work properly for multiple terminals when called by putc() because of keyboard input. It works just fine when called from terminal_write()
+    Type: Logical and deisgn error
+    Explanation: When pressing the enter key for a long while, the ccursor hits the bottom of the terminal window but doesn't scroll in the current terminal window. Instead, it scrolls the vid mem of a different terminal (terminal 3). Luckily, we saw a pattern here and knew that it was just the mapping of the video memory that was messed up. Fixing this was a simple matter of calling scroll_screen ONLY on the video memory when this fn is called from the keyboard interrupt handler.
+    
+15) Description: keyboard handler prints data to random terminals (there was absolutely no pattern we could find!)
+    Type: deisgn error
+    Explanation: Our entire multiple terminal setup works on two global variables which represent the current terminal being viewed by the user and another one which represents the current process that the pit is working on. For the keyboard buffer's putc() function call, we had setup checks to only print in the correct terminal vid but somehow that didn't work out for this particular scenario (very similar to other problems we faced with scrolling during typing). To fix this, we simply had to create a separate function which would always print to the vid mem irrespective of which process was being worked on by the pit.
+    
+16) Description: 
+    Type: 
+    Explanation: 
+            

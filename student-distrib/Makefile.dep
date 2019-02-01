@@ -1,0 +1,32 @@
+boot.o: boot.S multiboot.h x86_desc.h types.h paging.h
+system_call_assembly_linkage.o: system_call_assembly_linkage.S \
+  system_call_assembly_linkage.h lib.h types.h x86_desc.h paging.h \
+  systemcalls.h file_sys.h rtc.h i8259.h tests.h terminal_driver.h \
+  interrupt_handlers.h
+x86_desc.o: x86_desc.S x86_desc.h types.h paging.h
+file_sys.o: file_sys.c file_sys.h types.h lib.h x86_desc.h paging.h rtc.h \
+  i8259.h tests.h
+i8259.o: i8259.c i8259.h types.h lib.h
+idt.o: idt.c idt.h i8259.h types.h lib.h x86_desc.h paging.h \
+  interrupt_handlers.h rtc.h tests.h system_call_assembly_linkage.h \
+  systemcalls.h file_sys.h terminal_driver.h pit.h
+interrupt_handlers.o: interrupt_handlers.c interrupt_handlers.h lib.h \
+  types.h terminal_driver.h i8259.h tests.h systemcalls.h paging.h \
+  file_sys.h x86_desc.h rtc.h
+kernel.o: kernel.c multiboot.h types.h x86_desc.h paging.h lib.h i8259.h \
+  debug.h tests.h rtc.h terminal_driver.h file_sys.h systemcalls.h \
+  interrupt_handlers.h pit.h
+lib.o: lib.c lib.h types.h i8259.h
+paging.o: paging.c paging.h types.h
+pit.o: pit.c pit.h lib.h types.h i8259.h paging.h systemcalls.h \
+  file_sys.h x86_desc.h rtc.h tests.h terminal_driver.h \
+  interrupt_handlers.h
+rtc.o: rtc.c rtc.h lib.h types.h i8259.h tests.h
+systemcalls.o: systemcalls.c systemcalls.h lib.h types.h paging.h \
+  file_sys.h x86_desc.h rtc.h i8259.h tests.h terminal_driver.h \
+  interrupt_handlers.h
+terminal_driver.o: terminal_driver.c terminal_driver.h lib.h types.h \
+  interrupt_handlers.h file_sys.h x86_desc.h paging.h rtc.h i8259.h \
+  tests.h
+tests.o: tests.c tests.h types.h x86_desc.h paging.h lib.h i8259.h rtc.h \
+  terminal_driver.h file_sys.h systemcalls.h interrupt_handlers.h
